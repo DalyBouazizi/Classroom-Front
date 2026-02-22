@@ -24,6 +24,10 @@ const SubjectList = () => {
    const departementFilters = selectedDepartment === "all" ? [] : [{
        field : 'department',operator : 'eq' as const , value : selectedDepartment
    }];
+   const searchFilters = searchQuery ? [
+       {field: 'name', operator : 'contains' as const , value : selectedDepartment},
+   ]: [];
+
    const SubjectTable = useTable<Subject>({
 
         columns: useMemo<ColumnDef<Subject>[]>(
@@ -43,27 +47,27 @@ const SubjectList = () => {
                     cell: ({getValue}) => (
                         <span className="text-foreground">{getValue<string>()}</span>
                     ),
-                    FilterFn:'includesString'
+                    filterFn:'includesString'
                 },
                 {
                     id: "departement",
                     accessorKey: "departement",
                     size: 150,
-                    header: () => <p className="column-title">departement</p>,
+                    header: () => <p className="column-title">Departement</p>,
                     cell: ({getValue}) => (
                         <Badge variant='secondary'>{getValue<string>()}</Badge>
                     ),
-                    FilterFn:'includesString'
+                    filterFn:'includesString'
                 },
                 {
                     id: "description",
                     accessorKey: "description",
                     size: 300,
-                    header: () => <p className="column-title">description</p>,
+                    header: () => <p className="column-title">Description</p>,
                     cell: ({getValue}) => (
                         <span className="truncate line-clamp-2">{getValue<string>()}</span>
                     ),
-                    FilterFn:'includesString'
+                    filterFn:'includesString'
                 }
 
                 ],[]),
@@ -74,9 +78,12 @@ const SubjectList = () => {
                 mode: "server",
             },
             filters: {
-                permanent : []
+                permanent : [...departementFilters, ...searchFilters]
             },
             sorters: {
+                initial : [
+                    {field : 'id' , order : 'desc'},
+                ]
 
             },
         },
