@@ -50,6 +50,7 @@ const ClassesCreate = () => {
         refineCore: { onFinish },
         handleSubmit,
         formState: { isSubmitting, errors },
+        register,
         control,
     } = form;
 
@@ -153,6 +154,7 @@ const ClassesCreate = () => {
                                                     }}
                                                 />
                                             </FormControl>
+                                            <input type="hidden" {...register("bannerCldPubId")} />
                                             <FormMessage />
                                             {errors.bannerCldPubId && !errors.bannerUrl && (
                                                 <p className="text-destructive text-sm">
