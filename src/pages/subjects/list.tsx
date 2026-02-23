@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react'
 import {ListView} from "@/components/refine-ui/views/list-view.tsx";
 import {Breadcrumb} from "@/components/ui/breadcrumb.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import {DEPARTEMENTS_OPTIONS}  from "@/constants";
+
 
 import {
     Select,
@@ -10,13 +10,14 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select.tsx";
 import {CreateButton} from "@/components/refine-ui/buttons/create.tsx";
 import {DataTable} from "@/components/refine-ui/data-table/data-table.tsx";
 import {useTable} from "@refinedev/react-table";
 import {Subject} from "@/Types";
 import {ColumnDef} from "@tanstack/react-table";
-import {Badge} from "@/components/ui/badge";
+import {Badge} from "@/components/ui/badge.tsx";
+import { DEPARTMENT_OPTIONS } from "@/constants";
 
 const SubjectList = () => {
    const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +26,7 @@ const SubjectList = () => {
        field : 'department',operator : 'eq' as const , value : selectedDepartment
    }];
    const searchFilters = searchQuery ? [
-       {field: 'name', operator : 'contains' as const , value : selectedDepartment},
+       {field: 'name', operator : 'contains' as const , value : searchQuery},
    ]: [];
 
    const SubjectTable = useTable<Subject>({
@@ -51,7 +52,7 @@ const SubjectList = () => {
                 },
                 {
                     id: "departement",
-                    accessorKey: "departement",
+                    accessorKey: "departement.name",
                     size: 150,
                     header: () => <p className="column-title">Departement</p>,
                     cell: ({getValue}) => (
@@ -120,7 +121,7 @@ const SubjectList = () => {
 
                             <SelectContent>
                                 <SelectItem value="all">All Departments</SelectItem>
-                                {DEPARTEMENTS_OPTIONS.map((department) => (
+                                {DEPARTMENT_OPTIONS.map((department) => (
                                     <SelectItem key={department.value} value={department.value}>
                                         {department.label}
                                     </SelectItem>
