@@ -1,31 +1,64 @@
-
-
 import {
-  BaseRecord,
-  DataProvider,
-  GetListParams,
-  GetListResponse
-} from "@refinedev/core";
-import { mockSubjects } from "@/constants/mock-data";
+  createDataProvider,
+  CreateDataProviderOptions,
+} from "@refinedev/rest";
 
-export const dataProvider: DataProvider = {
-  getList: async <TData extends BaseRecord = BaseRecord>(
-      { resource }: GetListParams
-  ): Promise<GetListResponse<TData>> => {
+import { BACKEND_BASE_URL } from "@/constants";
+import { ListResponse } from "@/Types";
 
-    if (resource !== "subjects")
-      return { data: [] as TData[], total: 0 };
+const options: CreateDataProviderOptions = {
+  getList: {
+    getEndpoint: ({ resource }) => resource,
 
-    return {
-      data: mockSubjects as unknown as TData[],
-      total: mockSubjects.length,
-    };
+    // Convert refine pagination/filters -> backend query params
+    buildQueryParams: async ({ resource, pagination, filters }) => {
+      const page = pagination?.currentPage ?? 1;
+      const pageSize = pagination?.pageSize ?? 10;
+
+      // base params used by your Express API
+      const params: Record<string, string | number> = {
+        page,
+        limit: pageSize,
+      };
+
+
+
+      filters?.forEach((filter) => {
+        // guard because refine filter type is a union
+        const field = "field" in filter ? String(filter.field) : "";
+        const value = String(filter.value ?? "");
+
+        if (!field || !value) return;
+
+        if (resource === "subjects") {
+          if (field === "department") params.department = value;
+
+          // You treat name/code as a single "search" query param
+          if (field === "name" || field === "code") params.search = value;
+        }
+      });
+
+      return params;
+    },
+
+    mapResponse: async (response) => {
+      const payload: ListResponse = await response.json();
+      return payload.data ?? [];
+    },
+
+    getTotalCount: async (response) => {
+      const payload: ListResponse = await response.json();
+
+      return (
+          payload.pagination?.total ??
+          payload.data?.length ??
+          0
+      );
+    },
   },
-
-  getOne : async () => {throw new Error('This function is not implemented yet')},
-  create : async () => {throw new Error('This function is not implemented yet')},
-  update : async () => {throw new Error('This function is not implemented yet')},
-  deleteOne : async () => {throw new Error('This function is not implemented yet')},
-
-  getApiUrl: () => '',
 };
+
+const { dataProvider } =
+    createDataProvider(BACKEND_BASE_URL, options);
+
+export { dataProvider };
